@@ -1,9 +1,10 @@
 # Author: ec25
-# Date: 2025-08-01
+# Date: 2025-08-04
 # Description: Script to process and save the RSI of the received tickers as CSV
-# Version: 0.1
+# Version: 0.2
 
 import csv
+from time import sleep
 from datetime import datetime
 from os import path as os_path
 from finvizfinance.quote import finvizfinance
@@ -13,11 +14,13 @@ def get_rsi(ticker: str) -> str:
     """Return the RSI (14) of `ticker` on the Finviz Finance service"""
     if ticker == "":
         raise Exception("Ticker is empty")
-
-    stock = finvizfinance(ticker)
-    data = stock.ticker_fundament()
-    rsi = data.get("RSI (14)", "?")
-    return str(rsi)
+    try:
+        stock = finvizfinance(ticker)
+        data = stock.ticker_fundament()
+        rsi = data.get("RSI (14)", "?")
+        return str(rsi)
+    except Exception:
+        return "?"
 
 
 def load_tickers() -> list[str]:
@@ -58,8 +61,16 @@ def app() -> str:
         if len(tickers) == 0:
             raise Exception("No tickers found in tickers.txt")
 
+        count = 0
         result = []
         for ticker in tickers:
+            if count == 20:
+                count = 0
+                print(f"Processed {tickers.index(ticker)}/{len(tickers)}.")
+                print("Waiting 1 second...")
+                sleep(1)
+
+            count += 1
             rsi = get_rsi(ticker)
             if rsi == "?":
                 exit_msg += f"RSI not found for {ticker}\n"

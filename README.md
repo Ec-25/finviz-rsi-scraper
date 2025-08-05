@@ -50,3 +50,9 @@ pip install finvizfinance
    ```
 
 5. A file named `results_YYYY-MM-DD_HH-MM.csv` will be generated with the fetched RSI data.
+
+## 🛠 Technical details
+
+- Uses `finvizfinance.quote.finvizfinance` to retrieve stock data.
+- Waits 1 second every 20 tickers to avoid rate limits.
+- If the RSI is not found, it will be marked as `"?"`.
