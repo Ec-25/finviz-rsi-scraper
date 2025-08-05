@@ -1,0 +1,9 @@
+# paths
+.vscode
+env
+output
+
+# files
+*.temp
+*.csv
+tickers.txt
