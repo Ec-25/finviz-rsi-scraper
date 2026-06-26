@@ -2,8 +2,9 @@
 .vscode
 env
 output
+temp
 
 # files
 *.temp
 *.csv
-tickers.txt
+!tickers.example.csv

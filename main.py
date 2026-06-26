@@ -1,7 +1,8 @@
 # Author: ec25
-# Date: 2025-08-04
+# Date: 2026-06-26
 # Description: Script to process and save the RSI of the received tickers as CSV
-# Version: 0.2
+# Version: 0.3
+# Licence: MIT
 
 import csv
 from time import sleep
@@ -17,30 +18,35 @@ def get_rsi(ticker: str) -> str:
     try:
         stock = finvizfinance(ticker)
         data = stock.ticker_fundament()
+        # Temporary workaround for finvizfinance bug.
+        # Remove once PR #155 is merged.
         rsi = data.get("RSI (14)", "?")
         return str(rsi)
-    except Exception:
+    except Exception as e:
+        print(e)
         return "?"
 
 
 def load_tickers() -> list[str]:
-    """Load the tickers from the `tickers.txt` file"""
-    if not os_path.exists("tickers.txt"):
-        raise Exception("tickers.txt not found")
+    """Load the tickers from the `tickers.csv` file"""
+    if not os_path.exists("tickers.csv"):
+        raise Exception("tickers.csv not found")
 
-    with open("tickers.txt", "r") as file:
-        tickers = file.read().split(";")
+    tickers = []
 
-    tickers = [ticker.strip() for ticker in tickers if ticker.strip() != ""]
+    with open("tickers.csv", "r", newline="", encoding="utf-8") as file:
+        reader = csv.reader(file, delimiter=";")
+        for row in reader:
+            tickers.extend(ticker.strip() for ticker in row if ticker.strip())
+
     return tickers
 
 
 def save_results_as_csv(results: list[dict[str, str]]) -> None:
     """Save the results to the `results_%Y-%m-%d_%H-%M.csv` file with semicolon as separator"""
-    filename = f"results_{datetime.now().strftime("%Y-%m-%d_%H-%M")}.csv"
-    with open(filename, 'w', newline='', encoding='utf-8') as csvfile:
-        writer = csv.DictWriter(csvfile, fieldnames=[
-                                'ticker', 'rsi'], delimiter=';')
+    filename = f"results_{datetime.now().strftime('%Y-%m-%d_%H-%M')}.csv"
+    with open(filename, "w", newline="", encoding="utf-8") as csvfile:
+        writer = csv.DictWriter(csvfile, fieldnames=["ticker", "rsi"], delimiter=";")
         writer.writeheader()
         writer.writerows(results)
 
@@ -59,18 +65,15 @@ def app() -> str:
     try:
         tickers = load_tickers()
         if len(tickers) == 0:
-            raise Exception("No tickers found in tickers.txt")
+            raise Exception("No tickers found in tickers.csv")
 
-        count = 0
         result = []
-        for ticker in tickers:
-            if count == 20:
-                count = 0
-                print(f"Processed {tickers.index(ticker)}/{len(tickers)}.")
+        for i, ticker in enumerate(tickers, start=1):
+            if i % 20 == 0:
+                print(f"Processed {i}/{len(tickers)}")
                 print("Waiting 1 second...")
                 sleep(1)
 
-            count += 1
             rsi = get_rsi(ticker)
             if rsi == "?":
                 exit_msg += f"RSI not found for {ticker}\n"

@@ -1,1 +1,1 @@
-finvizfinance==1.1.1
+finvizfinance==1.3.0
