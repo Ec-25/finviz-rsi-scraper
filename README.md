@@ -1,58 +1,110 @@
-# rsi-data-export
+# Finviz RSI Scraper
 
-Python script to fetch the RSI (Relative Strength Index) of a list of tickers using the [`finvizfinance`](https://github.com/lit26/finvizfinance) library and export it to a CSV file.
+A simple Python script that retrieves the **RSI (14)** indicator for a list of stock tickers using the `finvizfinance` library and exports the results to a CSV file.
 
-## 🔍 What does it do?
+## Features
 
-Reads tickers from a `tickers.txt` file, fetches their RSI (14) from Finviz, and saves the results in a CSV with the following format:
+* Reads stock tickers from a CSV file.
+* Retrieves the **RSI (14)** value for each ticker from Finviz.
+* Exports the results as a semicolon-separated CSV.
+* Handles missing or unavailable RSI values gracefully.
+* Includes a temporary workaround for the current `finvizfinance` issue (see `PATCH_FINVIZFINANCE.md`).
 
-```
-ticker;rsi
-AAPL;47.32
-GOOGL;63.21
-...
-```
+## Requirements
 
-## 📦 Requirements
+* Python 3.10+
+* Internet connection
 
-- Python 3.10+
-- [finvizfinance](https://pypi.org/project/finvizfinance/)
-
-Quick install:
+Install the required dependency:
 
 ```bash
-pip install finvizfinance
+pip install -r requirements.txt
 ```
 
-## 🚀 How to use
+## Important
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/your-username/rsi-data-export.git
-   cd rsi-data-export
-   ```
+The current version of `finvizfinance` is incompatible with the latest Finviz website layout.
 
-2. Start the virtual environment and install the requirements.
-   ```bash
-   python -m venv env
-   .\env\Scripts\activate
-   pip install -r requirements.txt
-   ```
+Before running the script, apply the temporary patch described in:
 
-3. Create a `tickers.txt` file in the same directory, with tickers separated by semicolons:
-   ```
-   AAPL;GOOGL;MSFT;TSLA
-   ```
+```text
+PATCH_FINVIZFINANCE.md
+```
 
-4. Run the script:
-   ```bash
-   python main.py
-   ```
+This patch can be removed once the upstream fix is released.
 
-5. A file named `results_YYYY-MM-DD_HH-MM.csv` will be generated with the fetched RSI data.
+## Input
 
-## 🛠 Technical details
+Create a file named:
 
-- Uses `finvizfinance.quote.finvizfinance` to retrieve stock data.
-- Waits 1 second every 20 tickers to avoid rate limits.
-- If the RSI is not found, it will be marked as `"?"`.
+```text
+tickers.csv
+```
+
+using semicolons (`;`) as separators.
+
+Example:
+
+```text
+AAPL;MSFT;TSLA
+```
+
+The repository includes a sample file:
+
+```text
+tickers.example.csv
+```
+
+Simply rename or copy it to `tickers.csv`.
+
+## Running
+
+Execute:
+
+```bash
+python main.py
+```
+
+## Output
+
+A CSV file named like:
+
+```text
+results_YYYY-MM-DD_HH-MM.csv
+```
+
+Example:
+
+```text
+ticker;rsi
+AAL;77.35
+AAP;57.57
+AAPL;37.15
+ABBV;73.39
+ABEV;55.37
+BPA11;?
+```
+
+A value of `?` indicates that the RSI could not be retrieved for that ticker.
+
+## Project Structure
+
+```text
+.
+├── main.py
+├── requirements.txt
+├── tickers.example.csv
+├── PATCH_FINVIZFINANCE.md
+├── LICENSE
+└── README.md
+```
+
+## Dependency
+
+This project uses:
+
+* `finvizfinance`
+
+## License
+
+This project is licensed under the MIT License. See the `LICENSE` file for details.
